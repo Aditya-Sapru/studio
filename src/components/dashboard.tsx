@@ -12,7 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/
 import { Skeleton } from './ui/skeleton';
 import { useAuth } from '@/hooks/use-auth';
 import { getFirebaseFirestore } from '@/lib/firebase';
-import { collection, query, where, onSnapshot, orderBy, limit } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, limit } from 'firebase/firestore';
 
 function DashboardSkeleton() {
   return (
@@ -69,12 +69,11 @@ export default function Dashboard() {
     const db = getFirebaseFirestore();
     const postureCol = collection(db, 'postureData');
     
-    // Simpler query: Get the last 200 records for the user.
-    // This is more robust than trying to find the "latest day".
+    // Query without orderBy to avoid index error, will sort client-side.
+    // Fetches the most recent 200 documents.
     const recentDataQuery = query(
       postureCol,
       where('userId', '==', user.uid),
-      orderBy('timestamp', 'desc'),
       limit(200)
     );
 
@@ -93,9 +92,10 @@ export default function Dashboard() {
             return null;
         })
         .filter((p): p is PostureRecord => p !== null)
-        .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime()); // sort ascending for charts
+        // Sort client-side: descending to find the latest, then ascending for charts
+        .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
 
-      setPostureData(records);
+      setPostureData(records.sort((a,b) => a.timestamp.getTime() - b.timestamp.getTime()));
       setLoading(false);
     }, (error) => {
       console.error("Error fetching posture data:", error);
