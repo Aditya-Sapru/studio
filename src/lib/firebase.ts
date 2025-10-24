@@ -1,12 +1,13 @@
 import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
 
 export const firebaseConfig = {
-  apiKey: "AIzaSyC50o0-xCwOdeR6pC8DUNKm9t_2xabcxXX",
+  apiKey: "AIzaSyDLi2owMRuwCS2o6mUQwCnfH-PKYbzPRZs",
   authDomain: "posturetracker-6c60d.firebaseapp.com",
   projectId: "posturetracker-6c60d",
-  storageBucket: "posturetracker-6c60d.appspot.com",
-  messagingSenderId: "367039542911",
-  appId: "1:367039542911:web:53a69344234346e43f063a",
+  storageBucket: "posturetracker-6c60d.firebasestorage.app",
+  messagingSenderId: "842774508787",
+  appId: "1:842774508787:web:81045e9e69a04107b03386",
+  measurementId: "G-6M2DSN6BS9"
 };
 
 // Initialize Firebase
