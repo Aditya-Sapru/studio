@@ -12,7 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/
 import { Skeleton } from './ui/skeleton';
 import { useAuth } from '@/hooks/use-auth';
 import { getClientApp } from '@/lib/firebase';
-import { getFirestore, collection, query, where, onSnapshot, Timestamp, orderBy, limit, getDocs } from 'firebase/firestore';
+import { getFirestore, collection, query, where, onSnapshot, orderBy, limit } from 'firebase/firestore';
 
 function DashboardSkeleton() {
   return (
@@ -42,6 +42,7 @@ function DashboardSkeleton() {
             </CardHeader>
             <CardContent>
                <Skeleton className="h-14 w-full" />
+               <Skeleton className="h-4 w-full mt-2" />
             </CardContent>
           </Card>
         </div>
@@ -68,51 +69,38 @@ export default function Dashboard() {
     const app = getClientApp();
     const db = getFirestore(app);
     const postureCol = collection(db, 'postureData');
-
-    const mostRecentQuery = query(
+    
+    // Simpler query: Get the last 200 records for the user.
+    // This is more robust than trying to find the "latest day".
+    const recentDataQuery = query(
       postureCol,
       where('userId', '==', user.uid),
       orderBy('timestamp', 'desc'),
-      limit(1)
+      limit(200)
     );
 
-    const unsubscribe = onSnapshot(mostRecentQuery, async (snapshot) => {
-      if (snapshot.empty) {
-        setPostureData([]);
-        setLoading(false);
-        return;
-      }
-
-      const mostRecentDoc = snapshot.docs[0];
-      const mostRecentDate = mostRecentDoc.data().timestamp.toDate();
-      
-      const startOfDay = new Date(mostRecentDate);
-      startOfDay.setHours(0, 0, 0, 0);
-      const endOfDay = new Date(mostRecentDate);
-      endOfDay.setHours(23, 59, 59, 999);
-
-      const dayQuery = query(
-        postureCol,
-        where('userId', '==', user.uid),
-        where('timestamp', '>=', Timestamp.fromDate(startOfDay)),
-        where('timestamp', '<=', Timestamp.fromDate(endOfDay)),
-        orderBy('timestamp', 'asc')
-      );
-
-      const daySnapshot = await getDocs(dayQuery);
-      const records = daySnapshot.docs.map(doc => {
-        const data = doc.data();
-        return {
-          id: doc.id,
-          timestamp: data.timestamp.toDate(),
-          sitting: data.posture === 'sitting'
-        } as PostureRecord;
-      });
+    const unsubscribe = onSnapshot(recentDataQuery, (snapshot) => {
+      const records = snapshot.docs
+        .map(doc => {
+            const data = doc.data();
+            // Ensure timestamp is converted to a JS Date object
+            if (data.timestamp && typeof data.timestamp.toDate === 'function') {
+                 return {
+                    id: doc.id,
+                    timestamp: data.timestamp.toDate(),
+                    sitting: data.posture === 'sitting'
+                } as PostureRecord;
+            }
+            return null;
+        })
+        .filter((p): p is PostureRecord => p !== null)
+        .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime()); // sort ascending for charts
 
       setPostureData(records);
       setLoading(false);
     }, (error) => {
       console.error("Error fetching posture data:", error);
+      setPostureData([]);
       setLoading(false);
     });
 
@@ -133,7 +121,7 @@ export default function Dashboard() {
     }
 
     const postureWithDurations = postureData.map((record) => {
-        return { ...record, duration: 5 };
+        return { ...record, duration: 5 }; // Assuming 5-minute intervals
     });
 
     const totalMinutes = postureWithDurations.reduce((sum, d) => sum + d.duration, 0);
@@ -170,7 +158,7 @@ export default function Dashboard() {
         {postureData.length === 0 ? (
            <Card>
             <CardHeader><CardTitle>No Activity Found</CardTitle></CardHeader>
-            <CardContent><p className="text-muted-foreground">Could not find any posture data for today. Wear your posture tracker or check if you have data recorded for a different day.</p></CardContent>
+            <CardContent><p className="text-muted-foreground">Could not find any posture data. Wear your posture tracker to start collecting data.</p></CardContent>
            </Card>
         ) : (
           <>
