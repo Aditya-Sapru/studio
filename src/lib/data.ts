@@ -2,7 +2,7 @@ import { Timestamp } from "firebase/firestore";
 
 export type PostureRecord = {
   id: string;
-  timestamp: Timestamp;
+  timestamp: Date; // Changed from Timestamp to Date
   sitting: boolean;
 };
 
@@ -26,7 +26,7 @@ function generateMockData(): PostureRecord[] {
 
     data.push({
       id: `mock-${i}`,
-      timestamp: Timestamp.fromDate(timestamp),
+      timestamp: timestamp,
       sitting: isSitting,
     });
     sessionDuration--;

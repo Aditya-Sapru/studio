@@ -21,7 +21,7 @@ export default function OverviewChart({ data }: OverviewChartProps) {
         }
 
         data.forEach(record => {
-            const hour = record.timestamp.toDate().getHours();
+            const hour = record.timestamp.getHours();
             if (record.sitting) {
                 hourlyData[hour].sitting += 5;
             } else {

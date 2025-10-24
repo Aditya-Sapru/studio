@@ -4,7 +4,6 @@ import { useMemo } from 'react';
 import { type PostureRecord } from '@/lib/data';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Timestamp } from 'firebase/firestore';
 
 interface PostureTimelineProps {
   data: PostureRecord[];
@@ -15,7 +14,7 @@ export default function PostureTimeline({ data }: PostureTimelineProps) {
     if (!data || data.length === 0) return [];
     
     return data.reduce((acc, record, index) => {
-      const startTime = record.timestamp.toDate();
+      const startTime = record.timestamp;
       
       if (index === 0 || record.sitting !== data[index-1].sitting) {
         acc.push({ 

@@ -69,7 +69,6 @@ export default function Dashboard() {
     const db = getFirestore(app);
     const postureCol = collection(db, 'postureData');
 
-    // First, find the most recent day with data
     const mostRecentQuery = query(
       postureCol,
       where('userId', '==', user.uid),
@@ -92,12 +91,11 @@ export default function Dashboard() {
       const endOfDay = new Date(mostRecentDate);
       endOfDay.setHours(23, 59, 59, 999);
 
-      // Now, query for all records on that day
       const dayQuery = query(
         postureCol,
         where('userId', '==', user.uid),
-        where('timestamp', '>=', startOfDay),
-        where('timestamp', '<=', endOfDay),
+        where('timestamp', '>=', Timestamp.fromDate(startOfDay)),
+        where('timestamp', '<=', Timestamp.fromDate(endOfDay)),
         orderBy('timestamp', 'asc')
       );
 
@@ -106,7 +104,7 @@ export default function Dashboard() {
         const data = doc.data();
         return {
           id: doc.id,
-          timestamp: data.timestamp,
+          timestamp: data.timestamp.toDate(), // Convert to JS Date object here
           sitting: data.posture === 'sitting'
         } as PostureRecord;
       });
@@ -135,7 +133,7 @@ export default function Dashboard() {
     }
 
     const postureWithDurations = postureData.map((record, index, arr) => {
-        if (index === 0) return { ...record, duration: 5 }; // Assume 5 minute duration for all records
+        if (index === 0) return { ...record, duration: 5 };
         return { ...record, duration: 5 };
     });
 
@@ -154,7 +152,7 @@ export default function Dashboard() {
     }, 0);
 
     const jsonPostureData = JSON.stringify(postureData.map(p => ({
-        timestamp: p.timestamp.toDate().toISOString(),
+        timestamp: p.timestamp.toISOString(),
         sitting: p.sitting
     })));
 
@@ -172,8 +170,8 @@ export default function Dashboard() {
       <main className="flex-1 space-y-4 p-4 md:p-8 pt-6">
         {postureData.length === 0 ? (
            <Card>
-            <CardHeader><CardTitle>No Activity Today</CardTitle></CardHeader>
-            <CardContent><p className="text-muted-foreground">There is no posture data recorded for the most recent day. Wear your posture tracker to see your activity.</p></CardContent>
+            <CardHeader><CardTitle>No Activity Found</CardTitle></CardHeader>
+            <CardContent><p className="text-muted-foreground">Could not find any posture data in the database. Wear your posture tracker to see your activity.</p></CardContent>
            </Card>
         ) : (
           <>
