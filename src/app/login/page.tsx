@@ -17,10 +17,11 @@ import { Label } from '@/components/ui/label';
 import { Logo } from '@/components/icons';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import Link from 'next/link';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('user@example.com');
-  const [password, setPassword] = useState('password');
+  const [password, setPassword] = useState('password123');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const router = useRouter();
@@ -32,10 +33,14 @@ export default function LoginPage() {
     try {
       await login(email, password);
       router.push('/');
-    } catch (error) {
+    } catch (error: any) {
+      let description = "Please check your email and password.";
+      if (error.code === 'auth/weak-password') {
+        description = "Password should be at least 6 characters.";
+      }
       toast({
         title: "Login Failed",
-        description: "Please check your email and password.",
+        description: description,
         variant: "destructive",
       });
       setLoading(false);
@@ -76,11 +81,17 @@ export default function LoginPage() {
               />
             </div>
           </CardContent>
-          <CardFooter>
+          <CardFooter className="flex-col gap-4">
             <Button type="submit" className="w-full" disabled={loading}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Sign In
             </Button>
+            <div className="mt-4 text-center text-sm">
+              Don&apos;t have an account?{' '}
+              <Link href="#" className="underline">
+                Sign up
+              </Link>
+            </div>
           </CardFooter>
         </form>
       </Card>
