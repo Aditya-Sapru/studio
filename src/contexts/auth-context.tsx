@@ -1,8 +1,8 @@
 'use client';
 
 import { createContext, useState, useEffect, ReactNode } from 'react';
-import { onAuthStateChanged, User, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { onAuthStateChanged, User, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword, getAuth } from 'firebase/auth';
+import { getClientApp } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
 
 interface AuthContextType {
@@ -19,6 +19,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  
+  const app = getClientApp();
+  const auth = getAuth(app);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -31,7 +34,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [auth]);
 
   const login = async (email: string, pass: string) => {
     try {
