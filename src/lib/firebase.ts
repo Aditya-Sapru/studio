@@ -2,7 +2,7 @@ import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 
 const firebaseConfig = {
-  apiKey: "your-api-key",
+  apiKey: "AIzaSyC50o0-xCwOdeR6pC8DUNKm9t_2xabcxXX",
   authDomain: "posturetracker-6c60d.firebaseapp.com",
   projectId: "posturetracker-6c60d",
   storageBucket: "posturetracker-6c60d.appspot.com",
