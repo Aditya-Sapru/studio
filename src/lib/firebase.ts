@@ -1,4 +1,6 @@
 import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 
 export const firebaseConfig = {
   apiKey: "AIzaSyDLi2owMRuwCS2o6mUQwCnfH-PKYbzPRZs",
@@ -10,17 +12,21 @@ export const firebaseConfig = {
   measurementId: "G-6M2DSN6BS9"
 };
 
-// Initialize Firebase
+// Centralized Firebase app instance
 let app: FirebaseApp;
-if (getApps().length === 0) {
-  app = initializeApp(firebaseConfig);
-} else {
-  app = getApp();
+
+function getClientApp(): FirebaseApp {
+    if (getApps().length === 0) {
+        app = initializeApp(firebaseConfig);
+    } else {
+        app = getApp();
+    }
+    return app;
 }
 
-export function getClientApp(): FirebaseApp {
-    if (getApps().length) {
-        return getApp();
-    }
-    return initializeApp(firebaseConfig);
-}
+// Export a function to get the app instance
+export const getFirebaseApp = () => getClientApp();
+
+// Export functions to get service instances
+export const getFirebaseAuth = () => getAuth(getClientApp());
+export const getFirebaseFirestore = () => getFirestore(getClientApp());

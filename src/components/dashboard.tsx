@@ -11,8 +11,8 @@ import StatCard from './dashboard/stat-card';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Skeleton } from './ui/skeleton';
 import { useAuth } from '@/hooks/use-auth';
-import { getClientApp } from '@/lib/firebase';
-import { getFirestore, collection, query, where, onSnapshot, orderBy, limit } from 'firebase/firestore';
+import { getFirebaseFirestore } from '@/lib/firebase';
+import { collection, query, where, onSnapshot, orderBy, limit } from 'firebase/firestore';
 
 function DashboardSkeleton() {
   return (
@@ -66,8 +66,7 @@ export default function Dashboard() {
       return;
     };
 
-    const app = getClientApp();
-    const db = getFirestore(app);
+    const db = getFirebaseFirestore();
     const postureCol = collection(db, 'postureData');
     
     // Simpler query: Get the last 200 records for the user.
