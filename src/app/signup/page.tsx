@@ -23,7 +23,7 @@ export default function SignupPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { signup } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
 
@@ -31,7 +31,7 @@ export default function SignupPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      await login(email, password, true); // This will create a user
+      await signup(email, password);
       router.push('/');
     } catch (error: any) {
        let title = 'Signup Failed';
@@ -59,6 +59,7 @@ export default function SignupPage() {
         description: description,
         variant: 'destructive',
       });
+    } finally {
       setLoading(false);
     }
   };

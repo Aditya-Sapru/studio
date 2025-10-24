@@ -31,7 +31,7 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      await login(email, password, false); // Explicitly a login attempt
+      await login(email, password);
       router.push('/');
     } catch (error: any) {
       let title = 'Login Failed';
@@ -59,6 +59,7 @@ export default function LoginPage() {
         description: description,
         variant: 'destructive',
       });
+    } finally {
       setLoading(false);
     }
   };

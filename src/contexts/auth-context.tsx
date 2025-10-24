@@ -8,7 +8,8 @@ import { useRouter } from 'next/navigation';
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (email: string, pass: string, isSignUp?: boolean) => Promise<void>;
+  login: (email: string, pass: string) => Promise<void>;
+  signup: (email: string, pass: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -32,23 +33,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => unsubscribe();
   }, []);
 
-  const login = async (email: string, pass: string, isSignUp = true) => {
+  const login = async (email: string, pass: string) => {
     try {
-      if (isSignUp) {
-        // This logic is for sign up, or sign in if user exists.
-         try {
-          await signInWithEmailAndPassword(auth, email, pass);
-        } catch (error: any) {
-          if (error.code === 'auth/user-not-found') {
-            await createUserWithEmailAndPassword(auth, email, pass);
-          } else {
-            throw error;
-          }
-        }
-      } else {
-        // This logic is only for sign in.
-        await signInWithEmailAndPassword(auth, email, pass);
-      }
+      await signInWithEmailAndPassword(auth, email, pass);
+    } catch (error: any) {
+        throw error;
+    }
+  };
+
+  const signup = async (email: string, pass: string) => {
+    try {
+      await createUserWithEmailAndPassword(auth, email, pass);
     } catch (error: any) {
         throw error;
     }
@@ -60,7 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     router.push('/login');
   };
 
-  const value = { user, loading, login, logout };
+  const value = { user, loading, login, signup, logout };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
