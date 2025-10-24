@@ -38,7 +38,7 @@ function DashboardSkeleton() {
           <Card className="col-span-4 lg:col-span-3">
             <CardHeader>
                <Skeleton className="h-6 w-1/2" />
-              <Skeleton className="h-4 w-3/4" />
+               <Skeleton className="h-4 w-3/4" />
             </CardHeader>
             <CardContent>
                <Skeleton className="h-14 w-full" />
@@ -69,46 +69,49 @@ export default function Dashboard() {
     const db = getFirestore(app);
     const postureCol = collection(db, 'postureData');
 
-    const q = query(
+    // First, find the most recent day with data
+    const mostRecentQuery = query(
       postureCol,
       where('userId', '==', user.uid),
-      orderBy('timestamp', 'desc')
+      orderBy('timestamp', 'desc'),
+      limit(1)
     );
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+    const unsubscribe = onSnapshot(mostRecentQuery, async (snapshot) => {
       if (snapshot.empty) {
         setPostureData([]);
         setLoading(false);
         return;
       }
+
+      const mostRecentDoc = snapshot.docs[0];
+      const mostRecentDate = mostRecentDoc.data().timestamp.toDate();
       
-      const records = snapshot.docs.map(doc => {
+      const startOfDay = new Date(mostRecentDate);
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(mostRecentDate);
+      endOfDay.setHours(23, 59, 59, 999);
+
+      // Now, query for all records on that day
+      const dayQuery = query(
+        postureCol,
+        where('userId', '==', user.uid),
+        where('timestamp', '>=', startOfDay),
+        where('timestamp', '<=', endOfDay),
+        orderBy('timestamp', 'asc')
+      );
+
+      const daySnapshot = await getDocs(dayQuery);
+      const records = daySnapshot.docs.map(doc => {
         const data = doc.data();
         return {
           id: doc.id,
           timestamp: data.timestamp,
-          // Convert posture string to boolean
           sitting: data.posture === 'sitting'
         } as PostureRecord;
       });
 
-      // Filter for the most recent day
-      if (records.length > 0) {
-        const mostRecentDate = records[0].timestamp.toDate();
-        const startOfDay = new Date(mostRecentDate);
-        startOfDay.setHours(0, 0, 0, 0);
-        const endOfDay = new Date(mostRecentDate);
-        endOfDay.setHours(23, 59, 59, 999);
-
-        const recentDayRecords = records.filter(record => {
-            const recordDate = record.timestamp.toDate();
-            return recordDate >= startOfDay && recordDate <= endOfDay;
-        });
-        
-        const sortedData = recentDayRecords.sort((a, b) => a.timestamp.toMillis() - b.timestamp.toMillis());
-        setPostureData(sortedData);
-      }
-      
+      setPostureData(records);
       setLoading(false);
     }, (error) => {
       console.error("Error fetching posture data:", error);

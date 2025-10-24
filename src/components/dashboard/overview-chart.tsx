@@ -12,6 +12,8 @@ interface OverviewChartProps {
 export default function OverviewChart({ data }: OverviewChartProps) {
 
     const chartData = useMemo(() => {
+        if (!data || data.length === 0) return [];
+        
         const hourlyData: { [key: number]: { sitting: number, standing: number } } = {};
 
         for (let i = 0; i < 24; i++) {
@@ -50,6 +52,14 @@ export default function OverviewChart({ data }: OverviewChartProps) {
         color: 'hsl(var(--chart-2))',
       },
     };
+    
+    if (chartData.length === 0) {
+      return (
+        <div className="flex h-[250px] w-full items-center justify-center text-muted-foreground">
+          Not enough data to display chart.
+        </div>
+      );
+    }
 
     return (
       <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
