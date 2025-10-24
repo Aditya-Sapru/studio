@@ -36,7 +36,7 @@ function DashboardSkeleton() {
             </CardContent>
           </Card>
           <Card className="col-span-4 lg:col-span-3">
-            <CardHeader>
+             <CardHeader>
                <Skeleton className="h-6 w-1/2" />
                <Skeleton className="h-4 w-3/4" />
             </CardHeader>
@@ -104,7 +104,7 @@ export default function Dashboard() {
         const data = doc.data();
         return {
           id: doc.id,
-          timestamp: data.timestamp.toDate(), // Convert to JS Date object here
+          timestamp: data.timestamp.toDate(),
           sitting: data.posture === 'sitting'
         } as PostureRecord;
       });
@@ -132,8 +132,7 @@ export default function Dashboard() {
         return { totalMinutes: 0, sittingMinutes: 0, standingMinutes: 0, sittingPercentage: 0, standingPercentage: 0, switches: 0, jsonPostureData: '[]' };
     }
 
-    const postureWithDurations = postureData.map((record, index, arr) => {
-        if (index === 0) return { ...record, duration: 5 };
+    const postureWithDurations = postureData.map((record) => {
         return { ...record, duration: 5 };
     });
 
@@ -152,7 +151,7 @@ export default function Dashboard() {
     }, 0);
 
     const jsonPostureData = JSON.stringify(postureData.map(p => ({
-        timestamp: p.timestamp.toISOString(),
+        timestamp: new Date(p.timestamp).toISOString(),
         sitting: p.sitting
     })));
 
@@ -171,7 +170,7 @@ export default function Dashboard() {
         {postureData.length === 0 ? (
            <Card>
             <CardHeader><CardTitle>No Activity Found</CardTitle></CardHeader>
-            <CardContent><p className="text-muted-foreground">Could not find any posture data in the database. Wear your posture tracker to see your activity.</p></CardContent>
+            <CardContent><p className="text-muted-foreground">Could not find any posture data for today. Wear your posture tracker or check if you have data recorded for a different day.</p></CardContent>
            </Card>
         ) : (
           <>

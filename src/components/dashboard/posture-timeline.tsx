@@ -13,10 +13,12 @@ export default function PostureTimeline({ data }: PostureTimelineProps) {
   const sessions = useMemo(() => {
     if (!data || data.length === 0) return [];
     
-    return data.reduce((acc, record, index) => {
+    const processedData = data.map(record => ({...record, timestamp: new Date(record.timestamp)}));
+
+    return processedData.reduce((acc, record, index) => {
       const startTime = record.timestamp;
       
-      if (index === 0 || record.sitting !== data[index-1].sitting) {
+      if (index === 0 || record.sitting !== processedData[index-1].sitting) {
         acc.push({ 
           sitting: record.sitting, 
           duration: 5,
