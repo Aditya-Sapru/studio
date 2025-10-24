@@ -19,41 +19,41 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
-export default function LoginPage() {
-  const [email, setEmail] = useState('user@example.com');
-  const [password, setPassword] = useState('password123');
+export default function SignupPage() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await login(email, password, false); // Explicitly a login attempt
+      await login(email, password, true); // This will create a user
       router.push('/');
     } catch (error: any) {
-      let title = 'Login Failed';
-      let description = 'An unexpected error occurred. Please try again.';
+       let title = 'Signup Failed';
+       let description = 'An unexpected error occurred. Please try again.';
 
       switch (error.code) {
-        case 'auth/user-not-found':
-          title = 'No Account Found';
-          description = 'No account exists with this email. Please sign up.';
+        case 'auth/email-already-in-use':
+          title = 'Email In Use';
+          description = 'This email is already associated with an account. Please log in.';
           break;
-        case 'auth/wrong-password':
-          title = 'Incorrect Password';
-          description = 'The password you entered is incorrect. Please try again.';
+        case 'auth/weak-password':
+          title = 'Weak Password';
+          description = 'Your password must be at least 6 characters long.';
           break;
-        case 'auth/invalid-credential':
-          title = 'Invalid Credentials';
-          description = 'Please check your email and password and try again.';
+        case 'auth/invalid-email':
+          title = 'Invalid Email';
+          description = 'Please enter a valid email address.';
           break;
         default:
-          console.error(error); // Log other errors
+          console.error(error);
       }
-
+      
       toast({
         title: title,
         description: description,
@@ -69,18 +69,18 @@ export default function LoginPage() {
         <CardHeader className="text-center">
           <div className="flex justify-center items-center gap-2 mb-4">
             <Logo className="h-8 w-8 text-primary" />
-            <CardTitle className="text-2xl font-headline">PosturePulse</CardTitle>
+            <CardTitle className="text-2xl font-headline">Create an Account</CardTitle>
           </div>
-          <CardDescription>Enter your credentials to access your dashboard.</CardDescription>
+          <CardDescription>Enter your email and password to get started.</CardDescription>
         </CardHeader>
-        <form onSubmit={handleLogin}>
+        <form onSubmit={handleSignup}>
           <CardContent className="grid gap-4">
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="m@example.com"
+                placeholder="you@example.com"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -92,6 +92,7 @@ export default function LoginPage() {
                 id="password" 
                 type="password" 
                 required 
+                placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
@@ -100,12 +101,12 @@ export default function LoginPage() {
           <CardFooter className="flex-col gap-4">
             <Button type="submit" className="w-full" disabled={loading}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Sign In
+              Sign Up
             </Button>
             <div className="mt-4 text-center text-sm">
-              Don&apos;t have an account?{' '}
-              <Link href="/signup" className="underline">
-                Sign up
+              Already have an account?{' '}
+              <Link href="/login" className="underline">
+                Sign in
               </Link>
             </div>
           </CardFooter>
