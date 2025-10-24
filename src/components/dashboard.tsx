@@ -1,9 +1,6 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { collection, onSnapshot, query, where, Timestamp, getFirestore } from 'firebase/firestore';
-import { useAuth } from '@/hooks/use-auth';
-import { getClientApp } from '@/lib/firebase';
 import { dailyPostureData, type PostureRecord } from '@/lib/data';
 import { Armchair, PersonStanding, Activity, Clock } from 'lucide-react';
 import AiFeedback from './dashboard/ai-feedback';
@@ -55,44 +52,15 @@ function DashboardSkeleton() {
 
 
 export default function Dashboard() {
-  const { user } = useAuth();
   const [postureData, setPostureData] = useState<PostureRecord[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user) return;
-    setLoading(true);
-
-    const app = getClientApp();
-    const db = getFirestore(app);
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const startOfToday = Timestamp.fromDate(today);
-
-    const q = query(
-      collection(db, 'users', user.uid, 'posture_records'),
-      where('timestamp', '>=', startOfToday)
-    );
-
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const data: PostureRecord[] = [];
-      querySnapshot.forEach((doc) => {
-        data.push(doc.data() as PostureRecord);
-      });
-      // Sort by timestamp ascending
-      data.sort((a, b) => a.timestamp.toMillis() - b.timestamp.toMillis());
-      setPostureData(data);
-      setLoading(false);
-    }, (error) => {
-        console.error("Error fetching posture data: ", error);
-        // Fallback to mock data on error
-        setPostureData(dailyPostureData); 
-        setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, [user]);
+    // We'll use the simulated data from dailyPostureData
+    const sortedData = [...dailyPostureData].sort((a, b) => a.timestamp.toMillis() - b.timestamp.toMillis());
+    setPostureData(sortedData);
+    setLoading(false);
+  }, []);
 
   const {
     totalMinutes,
