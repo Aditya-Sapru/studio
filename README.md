@@ -1,5 +1,4 @@
-# Firebase Studio
+# Posture tracking app
 
-This is a NextJS starter in Firebase Studio.
+This is a NextJS application that displays graphs and analytics of the data from the posture tracking app.
 
-To get started, take a look at src/app/page.tsx.
